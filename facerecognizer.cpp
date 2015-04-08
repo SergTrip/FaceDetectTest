@@ -10,19 +10,38 @@ FaceRecognizer::FaceRecognizer(QWidget *parent) :
     //====================== Нало полезного кода ===============================
     // Открыть файл
     // m_pOpenCVCapture = cvCaptureFromAVI( "../../../Data/video.avi" );
-    m_pOpenCVCapture = cvCaptureFromFile( "../../../Data/MyFace.3gp" );
+    // m_pOpenCVCapture = cvCaptureFromFile( "../../../Data/MyFace.3gp" );
 
-    //grab one frame to get width and height
-    IplImage* frame = cvQueryFrame( m_pOpenCVCapture );
+    // Пробуем открыть файл
+    m_oCVCapture.open( FILE_NAME );
+    // Пробуем открыть камеру
+    // m_oCVCapture.open( 0 );
+
+    // Если неудалось
+    if( !m_oCVCapture.isOpened() )
+    {
+        // Сообщить о неудаче
+        qDebug() << "Не удалось открыть файл или камеру!";
+        return;
+    }
+
+    // grab one frame to get width and height
+    // IplImage* frame = cvQueryFrame( m_pOpenCVCapture );
+    cv::Mat frame;
+    // Вычитываем первый кадр
+    m_oCVCapture >> frame;
 
     // Создать мзображение Qt c таким же размером
-    m_oQtImage = QImage( QSize( frame->width, frame->height ), QImage::Format_RGB888 );
+    m_oQtImage = QImage( QSize( frame.cols, frame.rows ), QImage::Format_RGB888 );
 
     // Установить размеры окна по размеру изображения
-    ((QWidget*)ui)->setMinimumSize( m_oQtImage.width(), m_oQtImage.height());
+    // ((QWidget*)ui)->setMinimumSize( m_oQtImage.width(), m_oQtImage.height());
+    this->setMinimumSize( m_oQtImage.width(), m_oQtImage.height());
     // Максимальные равны минимальным
-    ((QWidget*)ui)->setMaximumSize( ((QWidget*)ui)->minimumSize() );
+//    ((QWidget*)ui)->setMaximumSize( ((QWidget*)ui)->minimumSize() );
+    this->setMaximumSize( this->minimumSize() );
 
+    /*
     // Копирование изображения в OpenCV Image
     // Сreate only the header, as the data buffer is shared, and was allocated by QImage
     m_pOpenCVImage = cvCreateImageHeader( cvSize( m_oQtImage.width(), m_oQtImage.height() ), 8, 3 );
@@ -39,9 +58,11 @@ FaceRecognizer::FaceRecognizer(QWidget *parent) :
     // and since the buffers are shared - format should be consistent
     cvCvtColor( m_pOpenCVImage, m_pOpenCVImage, CV_BGR2RGB);
 
+
     //we need memstorage and a cascade
     m_pCvMemoryStorage  = cvCreateMemStorage( 0 );
     m_pOpenCVCascade    = (CvHaarClassifierCascade*)cvLoad( CASCADE_NAME, 0, 0, 0 );
+    */
 
     // Set timer for 50ms intervals
     m_pQtTimer = new QTimer(this);
@@ -62,6 +83,7 @@ CvRect FaceRecognizer::detectAndDraw(IplImage *img, CvMemStorage *storage, CvHaa
     CvRect res;
     res = cvRect( -1, -1, 0, 0 );
 
+/*
     // Указатели на экземпляры изображений
     IplImage *pGrayImage, *pSmallImage;
     // Пока не понятно
@@ -120,21 +142,24 @@ CvRect FaceRecognizer::detectAndDraw(IplImage *img, CvMemStorage *storage, CvHaa
             res = cvRect(r->x,r->y,r->width,r->height);
         }
     }
-
+*/
     // Вернуть результат
     return res;
 }
 
 void FaceRecognizer::queryFrame()
 {
-    IplImage* frame = cvQueryFrame( m_pOpenCVCapture );
+    // IplImage* frame = cvQueryFrame( m_pOpenCVCapture );
+    cv::Mat frame;
+    // Вычитываем первый кадр
+    m_oCVCapture >> frame;
 
-    if( frame->origin == IPL_ORIGIN_TL )
-        cvCopy( frame, m_pOpenCVImage, 0 );
-    else
-        cvFlip( frame, m_pOpenCVImage, 0 );
+//    if( frame->origin == IPL_ORIGIN_TL )
+//        cvCopy( frame, m_pOpenCVImage, 0 );
+//    else
+//        cvFlip( frame, m_pOpenCVImage, 0 );
 
-    cvCvtColor( m_pOpenCVImage, m_pOpenCVImage, CV_BGR2RGB );
+    cv::cvtColor( frame, frame, CV_BGR2RGB );
 
     CvRect r = detectAndDraw( m_pOpenCVImage, m_pCvMemoryStorage, m_pOpenCVCascade);
 
@@ -148,16 +173,16 @@ void FaceRecognizer::paintEvent(QPaintEvent* event)
 {
     QPainter painter( (QWidget*)this );
 
-    painter.drawImage( QPoint( ((QWidget*)ui)->x(), ((QWidget*)ui)->y() ), m_oQtImage);
+    painter.drawImage( this->x(), this->y(), m_oQtImage);
 
-    if ( m_oQtFaceLocationRect.x() > 0 && m_oQtFaceLocationRect.y() > 0 )
-    {
-        painter.setBrush    ( Qt::NoBrush               );
-        painter.setPen      ( QColor    ( 255, 0, 0)    );
+//    if ( m_oQtFaceLocationRect.x() > 0 && m_oQtFaceLocationRect.y() > 0 )
+//    {
+//        painter.setBrush    ( Qt::NoBrush               );
+//        painter.setPen      ( QColor    ( 255, 0, 0)    );
 
-        painter.drawRect    ( QRect     ( m_oQtFaceLocationRect.x() + ((QWidget*)ui)->x(),
-                                          m_oQtFaceLocationRect.y() + ((QWidget*)ui)->y(),
-                                          m_oQtFaceLocationRect.width (),
-                                          m_oQtFaceLocationRect.height()  ) );
-    }
+//        painter.drawRect    ( QRect     ( m_oQtFaceLocationRect.x() + ((QWidget*)ui)->x(),
+//                                          m_oQtFaceLocationRect.y() + ((QWidget*)ui)->y(),
+//                                          m_oQtFaceLocationRect.width (),
+//                                          m_oQtFaceLocationRect.height()  ) );
+//    }
 }

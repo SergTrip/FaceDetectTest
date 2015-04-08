@@ -15,7 +15,8 @@
 //#include "opencv2/highgui/highgui.hpp"
 //#include "opencv2/imgproc/imgproc.hpp"
 
-#define CASCADE_NAME "D:/Dropbox/Germanij/Projects/Faces/Data/haarcascades/haarcascade_eye_tree_eyeglasses.xml"
+#define CASCADE_NAME    "D:/Dropbox/Germanij/Projects/Faces/Data/haarcascades/haarcascade_eye_tree_eyeglasses.xml"
+#define FILE_NAME       "../../Data/MyFace.3gp"
 
 namespace Ui {
 class FaceRecognizer;
@@ -48,7 +49,8 @@ private:
     CvHaarClassifierCascade*    m_pOpenCVCascade;
     IplImage*                   m_pOpenCVImage;
 
-    CvCapture*                  m_pOpenCVCapture;
+    // CvCapture*                  m_pOpenCVCapture;
+    cv::VideoCapture            m_oCVCapture;
 
     // Реализация унаследованного класса перерисовки
     void paintEvent(QPaintEvent* event);
