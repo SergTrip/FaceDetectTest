@@ -8,14 +8,10 @@ FaceRecognizer::FaceRecognizer(QWidget *parent) :
     ui->setupUi(this);
 
     //====================== Нало полезного кода ===============================
-    // Открыть файл
-    // m_pOpenCVCapture = cvCaptureFromAVI( "../../../Data/video.avi" );
-    // m_pOpenCVCapture = cvCaptureFromFile( "../../../Data/MyFace.3gp" );
-
     // Пробуем открыть файл
-    m_oCVCapture.open( FILE_NAME );
+    // m_oCVCapture.open( FILE_NAME );
     // Пробуем открыть камеру
-    // m_oCVCapture.open( 0 );
+    m_oCVCapture.open( 0 );
 
     // Если неудалось
     if( !m_oCVCapture.isOpened() )
@@ -24,45 +20,26 @@ FaceRecognizer::FaceRecognizer(QWidget *parent) :
         qDebug() << "Не удалось открыть файл или камеру!";
         return;
     }
-
-    // grab one frame to get width and height
-    // IplImage* frame = cvQueryFrame( m_pOpenCVCapture );
-    cv::Mat frame;
     // Вычитываем первый кадр
-    m_oCVCapture >> frame;
+    m_oCVCapture >> m_oCVMat;
 
     // Создать мзображение Qt c таким же размером
-    m_oQtImage = QImage( QSize( frame.cols, frame.rows ), QImage::Format_RGB888 );
+    m_oQtImage = QImage( QSize( m_oCVMat.cols, m_oCVMat.rows ), QImage::Format_RGB888 );
 
     // Установить размеры окна по размеру изображения
-    // ((QWidget*)ui)->setMinimumSize( m_oQtImage.width(), m_oQtImage.height());
-    this->setMinimumSize( m_oQtImage.width(), m_oQtImage.height());
+    this->setMinimumSize( m_oQtImage.width(), m_oQtImage.height() );
     // Максимальные равны минимальным
-//    ((QWidget*)ui)->setMaximumSize( ((QWidget*)ui)->minimumSize() );
     this->setMaximumSize( this->minimumSize() );
 
-    /*
-    // Копирование изображения в OpenCV Image
-    // Сreate only the header, as the data buffer is shared, and was allocated by QImage
-    m_pOpenCVImage = cvCreateImageHeader( cvSize( m_oQtImage.width(), m_oQtImage.height() ), 8, 3 );
-    // Share buffers
-    m_pOpenCVImage->imageData = (char*)m_oQtImage.bits();
+    // Привязываем данные фрейма к озображнию
+    m_oCVMat.data = (uchar*)m_oQtImage.bits();
 
-    // Двойная буфферизация ???
-    if( frame->origin == IPL_ORIGIN_TL )
-        cvCopy( frame, m_pOpenCVImage, 0 );
-    else
-        cvFlip( frame, m_pOpenCVImage, 0 );
-
-    // Images from cvQueryFrame come in BGR form and not what Qt expects - RGB
-    // and since the buffers are shared - format should be consistent
-    cvCvtColor( m_pOpenCVImage, m_pOpenCVImage, CV_BGR2RGB);
-
+    // Редпетируем цветовую схему
+    cv::cvtColor( m_oCVMat, m_oCVMat, CV_BGR2RGB );
 
     //we need memstorage and a cascade
-    m_pCvMemoryStorage  = cvCreateMemStorage( 0 );
-    m_pOpenCVCascade    = (CvHaarClassifierCascade*)cvLoad( CASCADE_NAME, 0, 0, 0 );
-    */
+    //m_pCvMemoryStorage  = cvCreateMemStorage( 0 );
+    //m_pOpenCVCascade    = (CvHaarClassifierCascade*)cvLoad( CASCADE_NAME, 0, 0, 0 );
 
     // Set timer for 50ms intervals
     m_pQtTimer = new QTimer(this);
@@ -149,31 +126,31 @@ CvRect FaceRecognizer::detectAndDraw(IplImage *img, CvMemStorage *storage, CvHaa
 
 void FaceRecognizer::queryFrame()
 {
-    // IplImage* frame = cvQueryFrame( m_pOpenCVCapture );
-    cv::Mat frame;
-    // Вычитываем первый кадр
-    m_oCVCapture >> frame;
+    // Вычитываем следующий кадр
+    m_oCVCapture >> m_oCVMat;
 
-//    if( frame->origin == IPL_ORIGIN_TL )
-//        cvCopy( frame, m_pOpenCVImage, 0 );
-//    else
-//        cvFlip( frame, m_pOpenCVImage, 0 );
+    // Редактировать цветовую схему
+    cv::cvtColor( m_oCVMat, m_oCVMat, CV_BGR2RGB );
 
-    cv::cvtColor( frame, frame, CV_BGR2RGB );
+    // Определить расположение лица
+    // CvRect r = detectAndDraw( m_pOpenCVImage, m_pCvMemoryStorage, m_pOpenCVCascade);
 
-    CvRect r = detectAndDraw( m_pOpenCVImage, m_pCvMemoryStorage, m_pOpenCVCascade);
+    // Заглушка !!!
+    CvRect r = cvRect( -1, -1, 0, 0 );
 
+    // Нарисовать трецгольник на изображении
     m_oQtFaceLocationRect = QRect( QPoint( r.x, r.y ), QSize( r.width, r.height ));
-
+    // Обновить окно
     this->update();
 }
 
 // Finally - painting, which is easy:
 void FaceRecognizer::paintEvent(QPaintEvent* event)
 {
+    // Класс для рисования
     QPainter painter( (QWidget*)this );
-
-    painter.drawImage( this->x(), this->y(), m_oQtImage);
+    // Выводим изображение
+    painter.drawImage( 0, 0, m_oQtImage);
 
 //    if ( m_oQtFaceLocationRect.x() > 0 && m_oQtFaceLocationRect.y() > 0 )
 //    {

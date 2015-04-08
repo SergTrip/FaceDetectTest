@@ -15,7 +15,7 @@
 //#include "opencv2/highgui/highgui.hpp"
 //#include "opencv2/imgproc/imgproc.hpp"
 
-#define CASCADE_NAME    "D:/Dropbox/Germanij/Projects/Faces/Data/haarcascades/haarcascade_eye_tree_eyeglasses.xml"
+#define CASCADE_NAME    "../../Data/haarcascades/haarcascade_eye_tree_eyeglasses.xml"
 #define FILE_NAME       "../../Data/MyFace.3gp"
 
 namespace Ui {
@@ -47,7 +47,9 @@ private:
     // Хранилище с динамически изменяемым размером
     CvMemStorage*               m_pCvMemoryStorage;
     CvHaarClassifierCascade*    m_pOpenCVCascade;
-    IplImage*                   m_pOpenCVImage;
+    // IplImage*                   m_pOpenCVImage;
+
+    cv::Mat m_oCVMat;
 
     // CvCapture*                  m_pOpenCVCapture;
     cv::VideoCapture            m_oCVCapture;
