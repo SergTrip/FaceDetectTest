@@ -10,15 +10,23 @@
 #include <opencv/cv.h>
 #include <opencv2/opencv.hpp>
 
-#include <opencv2/objdetect.hpp>
+//#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/core/core.hpp>
 
-//#include "opencv2/highgui/highgui.hpp"
-//#include "opencv2/imgproc/imgproc.hpp"
+//#include <opencv2/videoio/videoio.hpp>
+
+#include <opencv2/highgui/highgui.hpp>
+
+#include <opencv2/objdetect/objdetect.hpp>
+
 
 #define FACE_CASCADE_NAME   "../../Data/haarcascades/haarcascade_frontalface_alt.xml"
+//#define FACE_CASCADE_NAME   "../../Data/lbpcascades/lbpcascade_frontalface.xml"
+
 #define EYE_CASCADE_NAME    "../../Data/haarcascades/haarcascade_eye_tree_eyeglasses.xml"
 
 #define FILE_NAME           "../../Data/MyFace.3gp"
+#define PHOTO_NAME          "../../Data/Face.jpg"
 
 namespace Ui {
 class FaceRecognizer;

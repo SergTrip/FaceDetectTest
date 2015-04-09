@@ -8,8 +8,8 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-TARGET = FaceDetectingTest
-TEMPLATE = app
+TARGET      = FaceDetectingTest
+TEMPLATE    = app
 
 
 SOURCES += main.cpp\
@@ -19,26 +19,131 @@ HEADERS  += facerecognizer.h
 
 FORMS    += facerecognizer.ui
 
+#  Установить версию OpenCV
+#OPENCV_VERSION  = V2
+OPENCV_VERSION = V3
 
-win32 {
+# Если компилируем с библиотекой версии 2.10
+equals ( OPENCV_VERSION, "V2" ){
+    # Если операционная система Windows
+    win32 {
+        # Путь к корню .h файлов
+        OPENCV_INCLUDE_PATH         = D:/Qt/opencv2/sources/include
+        OPENCV_INCLUDE_MODULE_PATH  = D:/Qt/opencv2/sources/modules
 
-    OPENCV_INCLUDE_PATH         = D:/Qt/opencv3/OpenCV_Git/include
-    OPENCV_INCLUDE_MODULE_PATH  = D:/Qt/opencv3/OpenCV_Git/modules
+        # Путь к библиотекам
+        OPENCV_LIBS_PATH            = D:/Qt/opencv2/build/x64/vc11/lib
+        # Добавить путь к библиотекам
+        LIBS    += -L$$OPENCV_LIBS_PATH
 
-    OPENCV_LIBS_PATH            = D:/Qt/opencv3/OpenCV_Git_Make/lib
+        CONFIG ( release ) {
+
+            message( " Version OpenCV - 2.10 - Release " )
+            message( $$OPENCV_LIBS_PATH )
+            message( $$LIBS )
+
+            LIBS    += -lopencv_core2410         -lopencv_imgproc2410
+            LIBS    += -lopencv_objdetect2410    #-lopencv_video2410
+            LIBS    += -lopencv_highgui2410
+
+        }
+
+        CONFIG ( debug ) {
+
+            message( " Version OpenCV - 2.10 - Debug " )
+            message( $$OPENCV_LIBS_PATH )
+            message( $$LIBS )
+
+            LIBS    += -lopencv_core2410d       -lopencv_imgproc2410d
+            LIBS    += -lopencv_objdetect2410d  #-lopencv_video2410d
+            LIBS    += -lopencv_highgui2410d
+        }
+    }
+
+    # Если операционная система Linux
+    unix {
+        # Путь к корню .h файлов
+        OPENCV_INCLUDE_PATH        = ~/Libs/OpenCV/opencv-3.0.0-alpha/include
+        OPENCV_INCLUDE_MODULE_PATH = ~/Libs/OpenCV/opencv-3.0.0-alpha/build/modules
+
+        # Путь к библиотекам
+        OPENCV_LIBS_PATH           = ~/Libs/OpenCV/opencv-3.0.0-alpha/build/lib
+
+        CONFIG ( release ) {
+            LIBS    += -L$$OPENCV_LIBS_PATH
+            LIBS    += -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_objdetect
+        }
+
+        CONFIG ( debug ) {
+            LIBS    += -L$$OPENCV_LIBS_PATH
+            LIBS    += -lopencv_cored -lopencv_imgcodecsd -lopencv_imgprocd -lopencv_objdetectd
+        }
+    }
 }
 
-unix {
+# Если компилируем с библиотекой версии 3.00
+equals( OPENCV_VERSION, "V3" ) {
+    # Если операционная система Windows
+    win32 {
+        # Путь к корню .h файлов
+        OPENCV_INCLUDE_PATH         = D:/Qt/opencv3/OpenCV_Git/include
+        OPENCV_INCLUDE_MODULE_PATH  = D:/Qt/opencv3/OpenCV_Git/modules
 
-    OPENCV_INCLUDE_PATH        = ~/Libs/OpenCV/opencv-3.0.0-alpha/include
-    OPENCV_INCLUDE_MODULE_PATH = ~/Libs/OpenCV/opencv-3.0.0-alpha/build/modules
+        # Путь к библиотекам
+        OPENCV_LIBS_PATH            = D:/Qt/opencv3/OpenCV_Git_Make/lib
 
-    OPENCV_LIBS_PATH           = ~/Libs/OpenCV/opencv-3.0.0-alpha/build/lib
+        CONFIG ( release ) {
+
+            message( " Version OpenCV - 3.00 - Release " )
+            message( $$OPENCV_LIBS_PATH )
+
+            LIBS    += -L$$OPENCV_LIBS_PATH/Release
+            LIBS    += -lopencv_core300         -lopencv_imgproc300
+            LIBS    += -lopencv_objdetect300    -lopencv_videoio300
+            LIBS    += -lopencv_highgui300      -lopencv_imgcodecs300
+        }
+
+        CONFIG ( debug ) {
+
+            message( " Version OpenCV - 3.00 - Debug " )
+            message( $$OPENCV_LIBS_PATH )
+
+            LIBS    += -L$$OPENCV_LIBS_PATH/Debug
+            LIBS    += -lopencv_core300d        -lopencv_imgproc300d
+            LIBS    += -lopencv_objdetect300d   #-lopencv_videoio300d
+            LIBS    += -lopencv_highgui300d     -lopencv_imgcodecs300d
+        }
+    }
+
+    # Если операционная система Linux
+    unix {
+        # Путь к корню .h файлов
+        OPENCV_INCLUDE_PATH        = ~/Libs/OpenCV/opencv-3.0.0-alpha/include
+        OPENCV_INCLUDE_MODULE_PATH = ~/Libs/OpenCV/opencv-3.0.0-alpha/build/modules
+
+        # Путь к библиотекам
+        OPENCV_LIBS_PATH           = ~/Libs/OpenCV/opencv-3.0.0-alpha/build/lib
+
+        CONFIG ( release ) {
+            LIBS    += -L$$OPENCV_LIBS_PATH
+            LIBS    += -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_objdetect
+        }
+
+        CONFIG ( debug ) {
+            LIBS    += -L$$OPENCV_LIBS_PATH
+            LIBS    += -lopencv_cored -lopencv_imgcodecsd -lopencv_imgprocd -lopencv_objdetectd
+        }
+    }
 }
+
+message( $$OPENCV_INCLUDE_PATH )
+message( $$OPENCV_INCLUDE_MODULE_PATH )
 
 INCLUDEPATH += $$OPENCV_INCLUDE_PATH
 
 INCLUDEPATH += $$OPENCV_INCLUDE_MODULE_PATH/core/include
+INCLUDEPATH += $$OPENCV_INCLUDE_MODULE_PATH/legacy/include
+INCLUDEPATH += $$OPENCV_INCLUDE_MODULE_PATH/contrib/include
 
 INCLUDEPATH += $$OPENCV_INCLUDE_MODULE_PATH/imgproc/include
 INCLUDEPATH += $$OPENCV_INCLUDE_MODULE_PATH/imgcodecs/include
@@ -57,28 +162,4 @@ INCLUDEPATH += $$OPENCV_INCLUDE_MODULE_PATH/calib3d/include
 INCLUDEPATH += $$OPENCV_INCLUDE_MODULE_PATH/ml/include
 
 INCLUDEPATH += $$OPENCV_INCLUDE_MODULE_PATH/flann/include
-
-win32   {
-
-    CONFIG ( release ) {
-
-        LIBS    += -L$$OPENCV_LIBS_PATH/Release
-        LIBS    += -lopencv_core300         -lopencv_imgproc300
-        LIBS    += -lopencv_objdetect300    -lopencv_videoio300 -lopencv_video300
-    }
-
-    CONFIG ( debug ) {
-
-        LIBS    += -L$$OPENCV_LIBS_PATH/Debug
-        LIBS    += -lopencv_core300d        -lopencv_imgproc300d
-        LIBS    += -lopencv_objdetect300d   -lopencv_videoio300d -lopencv_video300d
-    }
-}
-
-unix:CONFIG ( release, debug ) {
-
-    LIBS    += -L$$OPENCV_LIBS_PATH
-    LIBS    += -lopencv_core -lopencv_imgcodecs -lopencv_imgproc -lopencv_objdetect
-
-}
 

@@ -11,7 +11,7 @@ FaceRecognizer::FaceRecognizer(QWidget *parent) :
     // Пробуем открыть файл
     m_oCVCapture.open( FILE_NAME );
     // Пробуем открыть камеру
-    // m_oCVCapture.open( 0 );
+    //m_oCVCapture.open( 0 );
 
     // Если неудалось
     if( !m_oCVCapture.isOpened() )
@@ -22,6 +22,14 @@ FaceRecognizer::FaceRecognizer(QWidget *parent) :
     }
     // Вычитываем первый кадр
     m_oCVCapture >> m_oCVMat;
+
+    //m_oCVMat = cv::imread( PHOTO_NAME, CV_LOAD_IMAGE_COLOR);   // Read the file
+
+    if(! m_oCVMat.data )                              // Check for invalid input
+    {
+        qDebug() <<  "Could not open or find the image" ;
+        return;
+    }
 
     // Создать мзображение Qt c таким же размером
     m_oQtImage = QImage( QSize( m_oCVMat.cols, m_oCVMat.rows ), QImage::Format_RGB888 );
@@ -55,6 +63,7 @@ FaceRecognizer::FaceRecognizer(QWidget *parent) :
     // Подключить слот
     connect( m_pQtTimer, SIGNAL(timeout()), this, SLOT( queryFrame() ) );
     // Запустить таймер
+    m_pQtTimer->setSingleShot( true );
     m_pQtTimer->start(50);
 }
 
@@ -71,7 +80,7 @@ void FaceRecognizer::detectAndDraw()
     cv::Mat             frame_gray;
 
     // Преобразовать цвета
-    cv::cvtColor( m_oCVMat, frame_gray, CV_BGR2GRAY  );
+    cv::cvtColor( m_oCVMat, frame_gray, CV_RGB2GRAY  );
 
     // Выровнять гистограмму
     cv::equalizeHist( frame_gray, frame_gray );
@@ -80,15 +89,14 @@ void FaceRecognizer::detectAndDraw()
     cv::Rect                                temp_rect(1,1,1,1);
 
     faces.clear();
-    // Определить список лиц
-    m_pCVFaceCascade.detectMultiScale( frame_gray, faces, 1.1, 3, 0 | CV_HAAR_SCALE_IMAGE, cv::Size(30, 30) );
 
-    if( faces.empty() )
-        return;
+    // Определить список лиц
+    // m_pCVFaceCascade.detectMultiScale( frame_gray, faces, 1.1, 2, 0/* | CV_HAAR_SCALE_IMAGE*/,  cv::Size(100, 100));
 
     temp_size = faces.size();
-    temp_rect = faces[0];
 
+   // if( faces.size() > 5 )
+/*
     // Для каждого лица в списке
     for( size_t i = 0; i < faces.size(); i++ )
     {
@@ -98,7 +106,7 @@ void FaceRecognizer::detectAndDraw()
         // Зарезервировать массив глаз
         std::vector<cv::Rect> eyes;
         // На каждом лице найти глаза
-        m_pCVEyeCascade.detectMultiScale( faceROI, eyes, 1.1, 2, ( 0 | CV_HAAR_SCALE_IMAGE ), cv::Size(30, 30) );
+        m_pCVEyeCascade.detectMultiScale( faceROI, eyes, 1.1, 2, ( 0 | CV_HAAR_SCALE_IMAGE ) );
         // Если в списке 2 глаза
         if( eyes.size() == 2)
         {
@@ -121,22 +129,31 @@ void FaceRecognizer::detectAndDraw()
             }
         }
     }
+    */
 }
 
 void FaceRecognizer::queryFrame()
 {
     // Вычитываем следующий кадр
     m_oCVCapture >> m_oCVMat;
+    // m_oCVMat = cv::imread( PHOTO_NAME, CV_LOAD_IMAGE_COLOR);   // Read the file
+
+
+    // Преобразовать цвета
+    cv::cvtColor( m_oCVMat, m_oCVMat, CV_BGR2RGB  );
 
     // Если кадр не пуст
     if ( !m_oCVMat.empty() )
     {
         // Определить расположение лица
-        detectAndDraw();
+        this->detectAndDraw();
     }
 
     // Обновить окно
     this->update();
+
+    // Перезапустить таймер
+    m_pQtTimer->start(50);
 }
 
 // Finally - painting, which is easy:
