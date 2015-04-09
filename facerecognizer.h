@@ -15,12 +15,17 @@
 //#include "opencv2/highgui/highgui.hpp"
 //#include "opencv2/imgproc/imgproc.hpp"
 
-#define CASCADE_NAME    "../../Data/haarcascades/haarcascade_eye_tree_eyeglasses.xml"
-#define FILE_NAME       "../../Data/MyFace.3gp"
+#define FACE_CASCADE_NAME   "../../Data/haarcascades/haarcascade_frontalface_alt.xml"
+#define EYE_CASCADE_NAME    "../../Data/haarcascades/haarcascade_eye_tree_eyeglasses.xml"
+
+#define FILE_NAME           "../../Data/MyFace.3gp"
 
 namespace Ui {
 class FaceRecognizer;
 }
+
+//  using namespace cv;
+using namespace std;
 
 class FaceRecognizer : public QWidget
 {
@@ -32,7 +37,7 @@ public:
 
 private:
     // Непосредственно опеределяет расположение лица
-    CvRect detectAndDraw( IplImage* img, CvMemStorage* storage, CvHaarClassifierCascade* cascade );
+    void detectAndDraw();
 
 private:
     Ui::FaceRecognizer *ui;
@@ -45,14 +50,11 @@ private:
     QTimer* m_pQtTimer;
 
     // Хранилище с динамически изменяемым размером
-    CvMemStorage*               m_pCvMemoryStorage;
-    CvHaarClassifierCascade*    m_pOpenCVCascade;
-    // IplImage*                   m_pOpenCVImage;
+    cv::Mat                 m_oCVMat;
+    cv::VideoCapture        m_oCVCapture;
 
-    cv::Mat m_oCVMat;
-
-    // CvCapture*                  m_pOpenCVCapture;
-    cv::VideoCapture            m_oCVCapture;
+    cv::CascadeClassifier   m_pCVFaceCascade;
+    cv::CascadeClassifier   m_pCVEyeCascade;
 
     // Реализация унаследованного класса перерисовки
     void paintEvent(QPaintEvent* event);
